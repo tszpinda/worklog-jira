@@ -1,4 +1,4 @@
-### create config.json following example below:
+## create config.json following example below:
 ```
 {
   "host": "<company>.atlassian.net",
@@ -12,3 +12,5 @@
   "hourlyRate": 100
 }
 ```
+
+## run node install && node index.js
