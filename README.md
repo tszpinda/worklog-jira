@@ -13,4 +13,5 @@
 }
 ```
 
-## run node install && node index.js
+## run:
+`node install && node index.js`
