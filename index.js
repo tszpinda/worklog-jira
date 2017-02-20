@@ -10,35 +10,6 @@ jira.searchJira(`worklogAuthor = '${config.filter.worklogAuthor}'
                 AND worklogDate >= '${config.filter.startDate}'
                                 AND worklogDate <= '${config.filter.endDate}'`, {fields: ['worklog']}, printResults)
 
-function output(seconds) {
-  const totalMin = seconds / 60;
-  const totalHours = totalMin / 60;
-  return{totalMinutes: totalMin, totalHours: totalHours, amount: totalHours * config.hourlyRate};
-}
-
-function filterByUser(issue) {
-  return issue.author.key === 'tszpinda'
-}
-
-function round(aNumber){
-  return parseFloat(aNumber).toFixed(2);
-}
-
-function flattenWorklogs(worklogList1, worklogList2) {
-  return worklogList1.concat(worklogList2);
-}
-
-function groupTimePerIssue(groups, issue) {
-  let issueGroup = groups[issue.issueId];
-  if(!issueGroup)
-    issueGroup = {issueId: issue.issueId, timeSpentSeconds: 0};
-  issueGroup.timeSpentSeconds += issue.timeSpentSeconds;
-  groups[issue.issueId] = issueGroup;
-  return groups;
-}
-function convertObjectKeysToArray(obj) {
-  return Object.keys(obj).map(key => obj[key]);
-}
 
 function printResults(err, res) {
   if(err) throw err;
@@ -78,3 +49,33 @@ function printResults(err, res) {
   assert.equal(round(totals.amount), round(quickTotals.amount));
 }
 
+function output(seconds) {
+  const totalMin = seconds / 60;
+  const totalHours = totalMin / 60;
+  return{totalMinutes: totalMin, totalHours: totalHours, amount: totalHours * config.hourlyRate};
+}
+
+function filterByUser(issue) {
+  return issue.author.key === 'tszpinda'
+}
+
+function round(aNumber){
+  return parseFloat(aNumber).toFixed(2);
+}
+
+function flattenWorklogs(worklogList1, worklogList2) {
+  return worklogList1.concat(worklogList2);
+}
+
+function groupTimePerIssue(groups, issue) {
+  let issueGroup = groups[issue.issueId];
+  if(!issueGroup)
+    issueGroup = {issueId: issue.issueId, timeSpentSeconds: 0};
+  issueGroup.timeSpentSeconds += issue.timeSpentSeconds;
+  groups[issue.issueId] = issueGroup;
+  return groups;
+}
+
+function convertObjectKeysToArray(obj) {
+  return Object.keys(obj).map(key => obj[key]);
+}
