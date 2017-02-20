@@ -7,7 +7,7 @@
   "filter": {
     "startDate": "2017/01/01",
     "endDate": "2017/02/28",
-    "worklogAuthor": "<First and Last name of the user>"
+    "worklogAuthor": "<displayName (contains first and last name)>"
   },
   "hourlyRate": 100
 }

@@ -56,7 +56,7 @@ function output(seconds) {
 }
 
 function filterByUser(issue) {
-  return issue.author.key === 'tszpinda'
+  return issue.author.displayName === config.filter.worklogAuthor
 }
 
 function round(aNumber){
