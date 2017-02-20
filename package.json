@@ -1,0 +1,25 @@
+{
+  "name": "worklog-jira",
+  "version": "1.0.0",
+  "main": "index.js",
+  "dependencies": {
+    "jira-tszpinda": "https://github.com/tszpinda/node-jira"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tszpinda/worklog-jira.git"
+  },
+  "keywords": [
+    "jira",
+    "worklog",
+    "time",
+    "logged"
+  ],
+  "author": "tszpinda",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tszpinda/worklog-jira/issues"
+  },
+  "homepage": "https://github.com/tszpinda/worklog-jira#readme"
+}

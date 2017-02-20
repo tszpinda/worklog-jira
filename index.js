@@ -1,3 +1,5 @@
+require('request').defaults({proxy: process.env.HTTP_PROXY})
+
 const JiraApi = require('jira').JiraApi;
 const assert = require('assert');
 
@@ -19,31 +21,41 @@ function round(aNumber){
   return parseFloat(aNumber).toFixed(2);
 }
 
+function flattenWorklogs(worklogList1, worklogList2) {
+  return worklogList1.concat(worklogList2);
+}
+
+function groupTimePerIssue(groups, issue) {
+  let issueGroup = groups[issue.issueId];
+  if(!issueGroup)
+    issueGroup = {issueId: issue.issueId, timeSpentSeconds: 0};
+  issueGroup.timeSpentSeconds += issue.timeSpentSeconds;
+  groups[issue.issueId] = issueGroup;
+  return groups;
+}
+function convertObjectKeysToArray(obj) {
+  return Object.keys(obj).map(key => obj[key]);
+}
+
 function cb(err, res) {
-  let orginalList = res.issues.map(i => i.fields.worklog).map(worklog => worklog.worklogs);
+  if(err) throw err;
+  let worklogs = res.issues
+                  .map(i => i.fields.worklog)
+                  .map(worklog => worklog.worklogs)
+                  .reduce(flattenWorklogs)
+                  .filter(filterByUser);
 
-  let result = orginalList.reduce((arr, one) => {
-    return arr.concat(one);
-  }).filter(filterByUser);
+  const totalSec = worklogs
+                      .map(issue => issue.timeSpentSeconds)
+                      .reduce((timeSum, time) => timeSum + time);
 
-  const timeSpentSeconds = result.map(issue => issue.timeSpentSeconds);
-  const totalSec = timeSpentSeconds.reduce((a,b)=>a+b);
   const quickTotals = output(totalSec);
 
-  const firstElement = {};
-  const timeSpentSecondsPerIssue = result.reduce((group, issue) => {
-    const groupKey = issue.issueId + 'group';
-    let issueGroup = group[groupKey] || {};
-    issueGroup.key = groupKey;
-    issueGroup.issueId = issue.issueId;
-    issueGroup.timeSpentSeconds = issueGroup.timeSpentSeconds ? issueGroup.timeSpentSeconds + issue.timeSpentSeconds : issue.timeSpentSeconds;
-    group[groupKey] = issueGroup;
-    return group;
-  }, firstElement);
+  const timePerIssueObj = worklogs.reduce(groupTimePerIssue, {});
+  const timePerIssueArr = convertObjectKeysToArray(timePerIssueObj);
 
-  let nice = Object.keys(timeSpentSecondsPerIssue).map(key => timeSpentSecondsPerIssue[key]);
 
-  nice = nice.map(group => {
+  let nice = timePerIssueArr.map(group => {
     const org = res.issues.find(issue => issue.id == group.issueId);
     group.jira = org.key;
     const out = output(group.timeSpentSeconds);
@@ -52,11 +64,13 @@ function cb(err, res) {
   });
 
   const totals = nice.reduce((group, entry) => {
-    group.hours = group.hours ? group.hours + entry.totalHours : entry.totalHours;
-    group.amount = group.amount ? group.amount + entry.amount : entry.amount;
+    group.hours += entry.totalHours;
+    group.amount += entry.amount;
     return group;
-  }, {});
+  }, {hours: 0, amount: 0});
+
   console.log('Total Hours:', round(totals.hours), 'Total Amount:', round(totals.amount));
+
   assert.equal(round(totals.hours), round(quickTotals.totalHours));
   assert.equal(round(totals.amount), round(quickTotals.amount));
 }
