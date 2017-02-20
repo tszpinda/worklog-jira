@@ -6,6 +6,9 @@ const assert = require('assert');
 const config = require('./config');
 
 var jira = new JiraApi('https', config.host, config.port, config.user, config.password, 'latest');
+jira.searchJira(`worklogAuthor = '${config.filter.worklogAuthor}'
+                AND worklogDate >= '${config.filter.startDate}'
+                                AND worklogDate <= '${config.filter.endDate}'`, {fields: ['worklog']}, printResults)
 
 function output(seconds) {
   const totalMin = seconds / 60;
@@ -37,7 +40,7 @@ function convertObjectKeysToArray(obj) {
   return Object.keys(obj).map(key => obj[key]);
 }
 
-function cb(err, res) {
+function printResults(err, res) {
   if(err) throw err;
   let worklogs = res.issues
                   .map(i => i.fields.worklog)
@@ -75,6 +78,3 @@ function cb(err, res) {
   assert.equal(round(totals.amount), round(quickTotals.amount));
 }
 
-jira.searchJira(`worklogAuthor = '${config.filter.worklogAuthor}'
-                AND worklogDate >= '${config.filter.startDate}'
-                                AND worklogDate <= '${config.filter.endDate}'`, {fields: ['worklog']}, cb)
