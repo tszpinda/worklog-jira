@@ -2,6 +2,7 @@ require('request').defaults({proxy: process.env.HTTP_PROXY})
 
 const JiraApi = require('jira').JiraApi;
 const assert = require('assert');
+const moment = require('moment');
 
 const config = require('./config');
 
@@ -17,7 +18,9 @@ function printResults(err, res) {
                   .map(i => i.fields.worklog)
                   .map(worklog => worklog.worklogs)
                   .reduce(flattenWorklogs)
-                  .filter(filterByUser);
+                  .filter(filterByUser)
+                  .filter(filterByWorklogDate);
+
 
   const totalSec = worklogs
                       .map(issue => issue.timeSpentSeconds)
@@ -57,6 +60,15 @@ function output(seconds) {
 
 function filterByUser(issue) {
   return issue.author.displayName === config.filter.worklogAuthor
+}
+function filterByWorklogDate(issue) {
+  const format = 'YYYY-MM-DDTHH:mm:ss.SSSZ';
+  const shortFormat = 'YYYY/MM/DD';
+  const worklogDate = moment(issue.started, format);
+  const startDate = moment(config.filter.startDate, shortFormat);
+  const endDate = moment(config.filter.endDate, shortFormat);
+  const filter = worklogDate.isBetween(startDate, endDate);
+  return filter;
 }
 
 function round(aNumber){
