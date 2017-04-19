@@ -2,12 +2,12 @@
 ```
 {
   "host": "<company>.atlassian.net",
-  "user": "<jiraUserEmail>",
+  "user": "<jiraUsername>",
   "password": "<jiraUserPassword>",
   "filter": {
     "startDate": "2017/01/01",
     "endDate": "2017/02/28",
-    "worklogAuthor": "<displayName (contains first and last name)>"
+    "worklogAuthor": "<userName>"
   },
   "hourlyRate": 100
 }
